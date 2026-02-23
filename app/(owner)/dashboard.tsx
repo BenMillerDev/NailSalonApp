@@ -1,4 +1,3 @@
-import { useRouter } from "expo-router";
 import { Alert, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import colors from "../../src/constants/colors";
 import theme from "../../src/constants/theme";
@@ -7,7 +6,6 @@ import { containerWidth, rs } from "../../src/utils/responsive";
 
 export default function DashboardScreen() {
   const { userProfile, logOut } = useAuth();
-  const router = useRouter();
 
   const handleLogOut = async () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
@@ -67,23 +65,6 @@ export default function DashboardScreen() {
             <Text style={styles.statNumber}>0</Text>
             <Text style={styles.statLabel}>Total Clients</Text>
           </View>
-        </View>
-        {/* Temporary nav buttons for testing */}
-        <View style={styles.tempNav}>
-          <TouchableOpacity
-            style={styles.tempNavButton}
-            onPress={() => router.push("/(owner)/services")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.tempNavText}>→ Services</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={styles.tempNavButton}
-            onPress={() => router.push("/(owner)/availability")}
-            activeOpacity={0.85}
-          >
-            <Text style={styles.tempNavText}>→ Availability</Text>
-          </TouchableOpacity>
         </View>
       </View>
     </View>
@@ -184,22 +165,5 @@ const styles = StyleSheet.create({
     color: colors.darkGray,
     textAlign: "center",
     marginTop: 2,
-  },
-  // temporary nav buttons for testing
-  tempNav: {
-    marginTop: theme.spacing.lg,
-    width: containerWidth - theme.spacing.lg * 2,
-    gap: theme.spacing.sm,
-  },
-  tempNavButton: {
-    backgroundColor: colors.white,
-    borderRadius: theme.radius.md,
-    padding: theme.spacing.md,
-    ...theme.shadows.sm,
-  },
-  tempNavText: {
-    fontSize: rs(15, 17),
-    fontWeight: "600",
-    color: colors.primary,
   },
 });
