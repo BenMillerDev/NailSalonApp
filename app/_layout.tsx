@@ -1,4 +1,5 @@
 import { Slot, useRouter, useSegments } from "expo-router";
+import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import { AuthProvider, useAuth } from "../src/context/AuthContext";
 
@@ -19,7 +20,12 @@ function RootLayoutNav() {
     }
   }, [user, isLoading]);
 
-  return <Slot />;
+  return (
+    <>
+      <StatusBar style="dark" />
+      <Slot />
+    </>
+  );
 }
 
 export default function RootLayout() {
