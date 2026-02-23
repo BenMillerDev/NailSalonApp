@@ -77,6 +77,13 @@ export default function DashboardScreen() {
           >
             <Text style={styles.tempNavText}>→ Services</Text>
           </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.tempNavButton}
+            onPress={() => router.push("/(owner)/availability")}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.tempNavText}>→ Availability</Text>
+          </TouchableOpacity>
         </View>
       </View>
     </View>
