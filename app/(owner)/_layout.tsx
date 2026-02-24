@@ -109,9 +109,9 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFFFFF",
     borderTopWidth: 1,
     borderTopColor: "#F0EEF2",
-    height: rs(70, 80),
+    height: rs(65, 75),
     paddingBottom: rs(8, 12),
-    paddingTop: rs(8, 10),
+    paddingTop: rs(6, 8),
     shadowColor: "#000",
     shadowOffset: { width: 0, height: -2 },
     shadowOpacity: 0.06,
@@ -121,19 +121,15 @@ const styles = StyleSheet.create({
   tabIcon: {
     alignItems: "center",
     justifyContent: "center",
-    gap: 2,
+    gap: 1,
+    width: rs(58, 70), // constrains each tab width so they don't spread too far
   },
   tabEmoji: {
-    fontSize: rs(22, 26),
+    fontSize: rs(20, 24), // slightly smaller emoji
   },
   tabLabel: {
-    fontSize: rs(10, 12),
+    fontSize: rs(9, 11), // slightly smaller text
     fontWeight: "600",
-  },
-  tabLabelActive: {
-    color: colors.primary,
-  },
-  tabLabelInactive: {
-    color: colors.midGray,
+    textAlign: "center",
   },
 });
