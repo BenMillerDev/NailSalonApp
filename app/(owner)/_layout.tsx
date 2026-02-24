@@ -132,4 +132,10 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
   },
+  tabLabelActive: {
+    color: colors.primary,
+  },
+  tabLabelInactive: {
+    color: colors.midGray,
+  },
 });

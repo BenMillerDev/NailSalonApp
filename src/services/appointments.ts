@@ -1,7 +1,6 @@
 import {
     addDoc,
     collection,
-    deleteDoc,
     doc,
     getDocs,
     orderBy,
@@ -17,44 +16,59 @@ import { db } from "./firebase";
 // TYPES
 // ─────────────────────────────────────────────
 
-export interface SalonService {
+export type AppointmentStatus =
+  | "pending"
+  | "confirmed"
+  | "completed"
+  | "cancelled";
+
+export interface Appointment {
   id?: string;
   ownerId: string;
-  category: string;
-  name: string;
-  description: string;
-  duration: number;
-  price: number;
-  addOns: string[];
-  isActive: boolean;
+  clientName: string;
+  clientEmail: string;
+  clientPhone: string;
+  services: AppointmentService[];
+  addOns: AppointmentAddOn[];
+  startTime: string; // ISO string
+  endTime: string; // ISO string
+  totalDuration: number; // minutes
+  totalPrice: number;
+  status: AppointmentStatus;
+  notes?: string;
+  nailShape?: string;
+  nailLength?: string;
   createdAt?: Timestamp;
   updatedAt?: Timestamp;
 }
 
-export interface ServiceFormData {
-  category: string;
+export interface AppointmentService {
+  id: string;
   name: string;
-  description: string;
   duration: number;
   price: number;
-  addOns: string[];
-  isActive: boolean;
+}
+
+export interface AppointmentAddOn {
+  id: string;
+  name: string;
+  duration: number;
+  price: number;
 }
 
 // ─────────────────────────────────────────────
-// SERVICE FUNCTIONS
+// APPOINTMENT FUNCTIONS
 // ─────────────────────────────────────────────
 
 /**
- * Fetch all services for a given owner
+ * Fetch all appointments for an owner
  */
-export async function getServices(ownerId: string): Promise<SalonService[]> {
+export async function getAppointments(ownerId: string): Promise<Appointment[]> {
   try {
     const q = query(
-      collection(db, "services"),
+      collection(db, "appointments"),
       where("ownerId", "==", ownerId),
-      orderBy("category"),
-      orderBy("name"),
+      orderBy("startTime", "desc"),
     );
     const snapshot = await getDocs(q);
     return snapshot.docs.map(
@@ -62,25 +76,81 @@ export async function getServices(ownerId: string): Promise<SalonService[]> {
         ({
           id: doc.id,
           ...doc.data(),
-        }) as SalonService,
+        }) as Appointment,
     );
   } catch (error) {
-    console.error("Error fetching services:", error);
+    console.error("Error fetching appointments:", error);
     return [];
   }
 }
 
 /**
- * Add a new service
+ * Fetch upcoming appointments for an owner
  */
-export async function addService(
+export async function getUpcomingAppointments(
   ownerId: string,
-  serviceData: ServiceFormData,
+): Promise<Appointment[]> {
+  try {
+    const now = new Date().toISOString();
+    const q = query(
+      collection(db, "appointments"),
+      where("ownerId", "==", ownerId),
+      where("startTime", ">=", now),
+      where("status", "in", ["pending", "confirmed"]),
+      orderBy("startTime", "asc"),
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as Appointment,
+    );
+  } catch (error) {
+    console.error("Error fetching upcoming appointments:", error);
+    return [];
+  }
+}
+
+/**
+ * Fetch past appointments for an owner
+ */
+export async function getPastAppointments(
+  ownerId: string,
+): Promise<Appointment[]> {
+  try {
+    const now = new Date().toISOString();
+    const q = query(
+      collection(db, "appointments"),
+      where("ownerId", "==", ownerId),
+      where("startTime", "<", now),
+      orderBy("startTime", "desc"),
+    );
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as Appointment,
+    );
+  } catch (error) {
+    console.error("Error fetching past appointments:", error);
+    return [];
+  }
+}
+
+/**
+ * Create a new appointment
+ * Called from the customer booking flow
+ */
+export async function createAppointment(
+  appointment: Omit<Appointment, "id" | "createdAt" | "updatedAt">,
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   try {
-    const docRef = await addDoc(collection(db, "services"), {
-      ...serviceData,
-      ownerId,
+    const docRef = await addDoc(collection(db, "appointments"), {
+      ...appointment,
       createdAt: serverTimestamp(),
       updatedAt: serverTimestamp(),
     });
@@ -91,15 +161,15 @@ export async function addService(
 }
 
 /**
- * Update an existing service
+ * Update appointment status
  */
-export async function updateService(
-  serviceId: string,
-  serviceData: Partial<ServiceFormData>,
+export async function updateAppointmentStatus(
+  appointmentId: string,
+  status: AppointmentStatus,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await updateDoc(doc(db, "services", serviceId), {
-      ...serviceData,
+    await updateDoc(doc(db, "appointments", appointmentId), {
+      status,
       updatedAt: serverTimestamp(),
     });
     return { success: true };
@@ -109,30 +179,15 @@ export async function updateService(
 }
 
 /**
- * Delete a service
+ * Update appointment notes
  */
-export async function deleteService(
-  serviceId: string,
+export async function updateAppointmentNotes(
+  appointmentId: string,
+  notes: string,
 ): Promise<{ success: boolean; error?: string }> {
   try {
-    await deleteDoc(doc(db, "services", serviceId));
-    return { success: true };
-  } catch (error: any) {
-    return { success: false, error: error.message };
-  }
-}
-
-/**
- * Toggle a service active/inactive
- * Lets the owner hide services without deleting them
- */
-export async function toggleServiceActive(
-  serviceId: string,
-  isActive: boolean,
-): Promise<{ success: boolean; error?: string }> {
-  try {
-    await updateDoc(doc(db, "services", serviceId), {
-      isActive,
+    await updateDoc(doc(db, "appointments", appointmentId), {
+      notes,
       updatedAt: serverTimestamp(),
     });
     return { success: true };
@@ -142,25 +197,34 @@ export async function toggleServiceActive(
 }
 
 /**
- * Seed default services for a new owner account
- * Called automatically after signup
+ * Get today's appointments for the dashboard
  */
-export async function seedDefaultServices(
+export async function getTodaysAppointments(
   ownerId: string,
-  defaultServices: ServiceFormData[],
-): Promise<void> {
+): Promise<Appointment[]> {
   try {
-    const promises = defaultServices.map((service) =>
-      addDoc(collection(db, "services"), {
-        ...service,
-        ownerId,
-        isActive: true,
-        createdAt: serverTimestamp(),
-        updatedAt: serverTimestamp(),
-      }),
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    const endOfDay = new Date();
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const q = query(
+      collection(db, "appointments"),
+      where("ownerId", "==", ownerId),
+      where("startTime", ">=", startOfDay.toISOString()),
+      where("startTime", "<=", endOfDay.toISOString()),
+      orderBy("startTime", "asc"),
     );
-    await Promise.all(promises);
+    const snapshot = await getDocs(q);
+    return snapshot.docs.map(
+      (doc) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        }) as Appointment,
+    );
   } catch (error) {
-    console.error("Error seeding default services:", error);
+    console.error("Error fetching today's appointments:", error);
+    return [];
   }
 }
