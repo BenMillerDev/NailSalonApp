@@ -10,12 +10,6 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_FIREBASE_APP_ID,
 };
 
-console.log("Firebase config loading:", {
-  apiKey: firebaseConfig.apiKey ? "present" : "MISSING",
-  projectId: firebaseConfig.projectId ? "present" : "MISSING",
-  authDomain: firebaseConfig.authDomain ? "present" : "MISSING",
-});
-
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
 const db = getFirestore(app);
 

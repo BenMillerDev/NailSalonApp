@@ -197,9 +197,9 @@ export function useBooking(ownerId: string) {
       totalDuration,
       totalPrice,
       status: "pending",
-      nailShape: booking.nailShape || undefined,
-      nailLength: booking.nailLength?.label || undefined,
-      notes: booking.notes || undefined,
+      ...(booking.nailShape ? { nailShape: booking.nailShape } : {}),
+      ...(booking.nailLength ? { nailLength: booking.nailLength.label } : {}),
+      ...(booking.notes ? { notes: booking.notes } : {}),
     };
 
     const result = await createBooking(payload);

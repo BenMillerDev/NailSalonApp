@@ -23,14 +23,8 @@ export async function getOwnerProfile(
   ownerId: string,
 ): Promise<OwnerProfile | null> {
   try {
-    console.log("Fetching owner profile for:", ownerId);
-    console.log("Firebase config:", {
-      projectId: process.env.REACT_APP_FIREBASE_PROJECT_ID,
-      apiKey: process.env.REACT_APP_FIREBASE_API_KEY ? "present" : "MISSING",
-    });
     const docRef = doc(db, "users", ownerId);
     const snapshot = await getDoc(docRef);
-    console.log("Snapshot exists:", snapshot.exists());
     if (snapshot.exists()) {
       return snapshot.data() as OwnerProfile;
     }
