@@ -1,6 +1,6 @@
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   RefreshControl,
@@ -190,6 +190,20 @@ export default function DashboardScreen() {
 
   const bookingLink = `https://nailsalonapp-a0fc5.web.app?owner=${user?.uid}`;
 
+  const prevUpcomingCount = useRef(upcoming.length);
+  const [newBookingAlert, setNewBookingAlert] = useState(false);
+
+  useEffect(() => {
+    if (
+      upcoming.length > prevUpcomingCount.current &&
+      prevUpcomingCount.current !== 0
+    ) {
+      setNewBookingAlert(true);
+      setTimeout(() => setNewBookingAlert(false), 4000);
+    }
+    prevUpcomingCount.current = upcoming.length;
+  }, [upcoming.length]);
+
   // Today's stats
   const todaysRevenue = todays
     .filter((a) => a.status !== "cancelled")
@@ -212,7 +226,8 @@ export default function DashboardScreen() {
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchAll();
+    // Listeners update automatically — just show the spinner briefly
+    await new Promise((resolve) => setTimeout(resolve, 800));
     setRefreshing(false);
   };
 
@@ -270,6 +285,13 @@ export default function DashboardScreen() {
           <Text style={styles.shareButtonText}>↑ Share</Text>
         </TouchableOpacity>
       </View>
+
+      {/* New Booking Alert */}
+      {newBookingAlert && (
+        <View style={styles.newBookingBanner}>
+          <Text style={styles.newBookingText}>🎉 New booking received!</Text>
+        </View>
+      )}
 
       {/* Today's Stats */}
       <Text style={styles.sectionTitle}>Today</Text>
@@ -587,5 +609,17 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: colors.darkGray,
     textAlign: "center",
+  },
+  newBookingBanner: {
+    backgroundColor: colors.status.confirmed,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    marginBottom: theme.spacing.md,
+    alignItems: "center",
+  },
+  newBookingText: {
+    fontSize: rs(15, 17),
+    fontWeight: "700",
+    color: colors.white,
   },
 });
