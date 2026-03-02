@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import AnalyticsSection from "../../src/components/owner/AnalyticsSection";
 import OnboardingChecklist from "../../src/components/owner/OnboardingChecklist";
 import colors from "../../src/constants/colors";
 import theme from "../../src/constants/theme";
@@ -406,6 +407,12 @@ export default function DashboardScreen() {
           </View>
         </>
       )}
+
+      {/* Analytics */}
+      <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
+        Analytics
+      </Text>
+      <AnalyticsSection />
 
       {/* Share Booking Link */}
       <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
