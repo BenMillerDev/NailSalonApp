@@ -11,10 +11,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import OnboardingChecklist from "../../src/components/owner/OnboardingChecklist";
 import colors from "../../src/constants/colors";
 import theme from "../../src/constants/theme";
 import { useAuth } from "../../src/context/AuthContext";
 import { useAppointments } from "../../src/hooks/useAppointments";
+import { useOnboarding } from "../../src/hooks/useOnboarding";
 import { Appointment } from "../../src/services/appointments";
 import { formatAppointmentDate, formatTime } from "../../src/utils/dateHelpers";
 import { formatDuration, formatPrice } from "../../src/utils/formatters";
@@ -231,11 +233,14 @@ export default function DashboardScreen() {
     setRefreshing(false);
   };
 
-  const handleCopyLink = async () => {
-    await Clipboard.setStringAsync(bookingLink);
-    setLinkCopied(true);
-    setTimeout(() => setLinkCopied(false), 2000);
-  };
+  const {
+    hasAddedService,
+    hasSetAvailability,
+    hasSharedLink,
+    showOnboarding,
+    markLinkShared,
+    handleDismiss,
+  } = useOnboarding();
 
   const handleShareLink = async () => {
     try {
@@ -243,9 +248,17 @@ export default function DashboardScreen() {
         message: `Book an appointment at ${userProfile?.salonName}: ${bookingLink}`,
         url: bookingLink,
       });
+      await markLinkShared();
     } catch (error) {
       await handleCopyLink();
     }
+  };
+
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(bookingLink);
+    setLinkCopied(true);
+    await markLinkShared();
+    setTimeout(() => setLinkCopied(false), 2000);
   };
 
   if (isLoading) {
@@ -282,6 +295,19 @@ export default function DashboardScreen() {
         <View style={styles.newBookingBanner}>
           <Text style={styles.newBookingText}>🎉 New booking received!</Text>
         </View>
+      )}
+
+      {/* Onboarding Checklist */}
+      {showOnboarding && (
+        <OnboardingChecklist
+          hasAddedService={hasAddedService}
+          hasSetAvailability={hasSetAvailability}
+          hasSharedLink={hasSharedLink}
+          onAddService={() => router.push("/(owner)/services")}
+          onSetAvailability={() => router.push("/(owner)/availability")}
+          onShareLink={handleShareLink}
+          onDismiss={handleDismiss}
+        />
       )}
 
       {/* Today's Stats */}
