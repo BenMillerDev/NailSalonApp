@@ -273,17 +273,8 @@ export default function DashboardScreen() {
       <View style={styles.header}>
         <View style={{ flex: 1 }}>
           <Text style={styles.greeting}>{getGreeting()} 👋</Text>
-          <Text style={styles.salonName} numberOfLines={1} ellipsizeMode="tail">
-            {userProfile?.salonName}
-          </Text>
+          <Text style={styles.salonName}>{userProfile?.salonName}</Text>
         </View>
-        <TouchableOpacity
-          style={styles.shareButton}
-          onPress={handleShareLink}
-          activeOpacity={0.85}
-        >
-          <Text style={styles.shareButtonText}>↑ Share</Text>
-        </TouchableOpacity>
       </View>
 
       {/* New Booking Alert */}
@@ -390,6 +381,36 @@ export default function DashboardScreen() {
         </>
       )}
 
+      {/* Share Booking Link */}
+      <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
+        Your Booking Link
+      </Text>
+      <View style={styles.card}>
+        <Text style={styles.bookingLinkDescription}>
+          Share this link with clients so they can book appointments directly.
+        </Text>
+        <View style={styles.linkActions}>
+          <TouchableOpacity
+            style={styles.linkButton}
+            onPress={handleCopyLink}
+            activeOpacity={0.85}
+          >
+            <Text style={styles.linkButtonText}>
+              {linkCopied ? "✓ Copied!" : "📋 Copy Link"}
+            </Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.linkButton, styles.linkButtonShare]}
+            onPress={handleShareLink}
+            activeOpacity={0.85}
+          >
+            <Text style={[styles.linkButtonText, styles.linkButtonShareText]}>
+              ↑ Share Link
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+
       {/* Quick Actions */}
       <Text style={[styles.sectionTitle, styles.sectionTitleSpaced]}>
         Quick Actions
@@ -470,18 +491,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: colors.charcoal,
     letterSpacing: -0.5,
-  },
-  shareButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: theme.spacing.md,
-    paddingVertical: theme.spacing.sm,
-    borderRadius: theme.radius.round,
-    flexShrink: 0, // prevents button from being squeezed
-  },
-  shareButtonText: {
-    fontSize: rs(13, 15),
-    fontWeight: "700",
-    color: colors.white,
   },
 
   // Section titles
@@ -620,6 +629,38 @@ const styles = StyleSheet.create({
   newBookingText: {
     fontSize: rs(15, 17),
     fontWeight: "700",
+    color: colors.white,
+  },
+
+  bookingLinkDescription: {
+    fontSize: rs(13, 15),
+    color: colors.darkGray,
+    marginBottom: theme.spacing.md,
+    lineHeight: rs(20, 22),
+  },
+  linkActions: {
+    flexDirection: "row",
+    gap: theme.spacing.sm,
+  },
+  linkButton: {
+    flex: 1,
+    backgroundColor: colors.lightGray,
+    borderRadius: theme.radius.md,
+    padding: theme.spacing.md,
+    alignItems: "center",
+    borderWidth: 1.5,
+    borderColor: colors.midGray,
+  },
+  linkButtonShare: {
+    backgroundColor: colors.primary,
+    borderColor: colors.primary,
+  },
+  linkButtonText: {
+    fontSize: rs(14, 16),
+    fontWeight: "700",
+    color: colors.charcoal,
+  },
+  linkButtonShareText: {
     color: colors.white,
   },
 });

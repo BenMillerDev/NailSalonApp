@@ -81,6 +81,22 @@ export default function OwnerLayout() {
         }}
       />
       <Tabs.Screen
+        name="clients"
+        options={{
+          tabBarIcon: ({ focused }) => (
+            <TabIcon emoji="👥" label="Clients" focused={focused} />
+          ),
+        }}
+      />
+
+      {/* Hide client-profile from tab bar */}
+      <Tabs.Screen
+        name="client-profile"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
         name="settings"
         options={{
           tabBarIcon: ({ focused }) => (
