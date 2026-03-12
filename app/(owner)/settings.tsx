@@ -94,14 +94,16 @@ export default function SettingsScreen() {
   };
 
   return (
-    <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === "ios" ? "padding" : "height"}
-      >
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
+      <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
         <ScrollView
-          showsVerticalScrollIndicator={false}
+          style={styles.container}
           contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
         >
           {/* Header */}
           <View style={styles.header}>
@@ -252,17 +254,19 @@ export default function SettingsScreen() {
           {/* App Version */}
           <Text style={styles.versionText}>NailSalon v1.0.0</Text>
         </ScrollView>
-      </KeyboardAvoidingView>
-    </TouchableWithoutFeedback>
+      </TouchableWithoutFeedback>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     ...theme.components.screen,
-    paddingTop: rs(60, 80),
+    flex: 1,
+    backgroundColor: colors.offWhite,
   },
   scrollContent: {
+    paddingTop: rs(60, 80),
     paddingHorizontal: theme.spacing.lg,
     paddingBottom: theme.spacing.xxl,
   },
